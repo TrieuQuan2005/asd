@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Trắc nghiệm – Chế độ hoạt động của mã khối</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f6f8;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 40px auto;
+        background: #fff;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+        text-align: center;
+    }
+
+    .progress {
+        height: 20px;
+        background: #ddd;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+
+    .progress-bar {
+        height: 100%;
+        width: 0%;
+        background: #4caf50;
+        transition: width 0.3s;
+    }
+
+    .question {
+        font-size: 18px;
+        margin-bottom: 15px;
+    }
+
+    .options label {
+        display: block;
+        padding: 8px;
+        margin-bottom: 5px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .options input {
+        margin-right: 8px;
+    }
+
+    .correct {
+        background: #c8e6c9;
+    }
+
+    .wrong {
+        background: #ffcdd2;
+    }
+
+    .buttons {
+        margin-top: 20px;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    button {
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+</style>
+</head>
+
+<body>
+<div class="container">
+    <h1>Trắc nghiệm: Chế độ hoạt động của mã khối</h1>
+
+    <div class="progress">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div id="quiz"></div>
+
+    <div class="buttons">
+        <button onclick="prevQuestion()">⬅ Câu trước</button>
+        <button onclick="nextQuestion()">Câu sau ➡</button>
+    </div>
+</div>
+
+<script>
+const questions = [
+    {
+        q: "Triển khai phần cứng thích hợp với loại nào hơn?",
+        options: ["AES", "Mã dòng", "ECB và OFB", "DES"],
+        answer: 1
+    },
+    {
+        q: "Chế độ mã khối nào có thể xử lí mã hóa song song?",
+        options: ["ECB", "OFB và CTR", "CBC và CTR", "ECB và CTR"],
+        answer: 3
+    },
+    {
+        q: "Lựa chọn phát biểu SAI?",
+        options: [
+            "CTR có độ an toàn thấp hơn các chế độ khác",
+            "CTR có khả năng song song hoá",
+            "CTR mã hoá bộ đếm chứ không trực tiếp mã hoá bản rõ",
+            "CTR chỉ cần thuật toán mã hóa"
+        ],
+        answer: 0
+    },
+    {
+        q: "Chế độ nào sử dụng vector khởi tạo IV?",
+        options: ["OFB và ECB", "ECB và CFB", "CBC và ECB", "OFB và CBC"],
+        answer: 3
+    },
+    {
+        q: "Lựa chọn đáp án ĐÚNG?",
+        options: [
+            "OFB: đổi IV → cùng bản rõ → bản mã khác",
+            "CBC: thứ tự bản mã không quan trọng",
+            "CFB giống ECB về IV",
+            "ECB phụ thuộc IV"
+        ],
+        answer: 0
+    },
+    {
+        q: "Lựa chọn phát biểu ĐÚNG?",
+        options: [
+            "CBC là Chaining Block Cipher",
+            "CBC cần giải đúng khối trước đó",
+            "Bản mã i phụ thuộc toàn bộ bản rõ trước",
+            "CBC cùng bản rõ luôn cho cùng bản mã"
+        ],
+        answer: 2
+    },
+    {
+        q: "Cùng bản rõ và khóa luôn cho cùng bản mã?",
+        options: ["Tất cả", "Chỉ ECB", "ECB và OFB", "CTR và CFB"],
+        answer: 1
+    },
+    {
+        q: "Ưu điểm của CBC so với ECB?",
+        options: [
+            "Che giấu cấu trúc bản rõ",
+            "Lỗi chỉ ảnh hưởng 1 khối",
+            "Mã hóa song song",
+            "Giải mã đơn giản hơn"
+        ],
+        answer: 0
+    },
+    {
+        q: "Chế độ nào hoạt động như mã dòng?",
+        options: ["CFB, OFB, CTR", "CBC và OFB", "CFB, CBC, ECB", "CFB và ECB"],
+        answer: 0
+    },
+    {
+        q: "Chế độ cho phép giải mã độc lập từng khối?",
+        options: ["ECB, CBC", "CFB, OFB", "CBC", "CTR, CFB"],
+        answer: 0
+    },
+    {
+        q: "Khẳng định nào ĐÚNG?",
+        options: [
+            "OFB chỉ phụ thuộc bản rõ",
+            "CBC cùng IV cho cùng bản mã",
+            "ECB phụ thuộc IV",
+            "ECB lỗi lan sang khối sau"
+        ],
+        answer: 1
+    },
+    {
+        q: "Đặc điểm của ECB?",
+        options: [
+            "Không lặp bản mã",
+            "Lỗi lan toàn bộ",
+            "Bản rõ giống → bản mã giống",
+            "Dùng bản mã trước"
+        ],
+        answer: 2
+    },
+    {
+        q: "Lựa chọn phát biểu SAI về ECB?",
+        options: [
+            "Mã hóa độc lập",
+            "Hoán vị khối tương ứng",
+            "Có thể song song",
+            "Lỗi ảnh hưởng nhiều khối"
+        ],
+        answer: 3
+    },
+    {
+        q: "Lựa chọn phát biểu ĐÚNG về CFB?",
+        options: [
+            "Mã hóa IV hoặc bản mã trước",
+            "Lỗi chỉ ảnh hưởng khối sau",
+            "Phụ thuộc bản rõ trước",
+            "Không tự đồng bộ"
+        ],
+        answer: 0
+    }
+];
+
+let current = 0;
+let selected = {};
+
+function render() {
+    const q = questions[current];
+    let html = `<div class="question"><b>Câu ${current + 1}:</b> ${q.q}</div><div class="options">`;
+
+    q.options.forEach((opt, i) => {
+        let cls = "";
+        if (selected[current] !== undefined) {
+            if (i === q.answer) cls = "correct";
+            else if (i === selected[current]) cls = "wrong";
+        }
+
+        html += `
+        <label class="${cls}">
+            <input type="radio" name="q" ${selected[current]===i?"checked":""}
+            onclick="choose(${i})"> ${opt}
+        </label>`;
+    });
+
+    html += "</div>";
+    document.getElementById("quiz").innerHTML = html;
+    document.getElementById("progressBar").style.width =
+        ((current + 1) / questions.length * 100) + "%";
+}
+
+function choose(i) {
+    selected[current] = i;
+    render();
+}
+
+function nextQuestion() {
+    if (current < questions.length - 1) current++;
+    render();
+}
+
+function prevQuestion() {
+    if (current > 0) current--;
+    render();
+}
+
+render();
+</script>
+</body>
+</html>
